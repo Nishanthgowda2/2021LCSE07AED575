@@ -1,17 +1,39 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+const express = require('express');
+const axios = require('axios');
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const app = express();
+const PORT = 8008;
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+app.get('/numbers', async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!Array.isArray(url)) {
+      url = ["http://20.244.56.144/numbers/primes", "http://20.244.56.144/numbers/fibo", "http://20.244.56.144/numbers/odd","http://20.244.56.144/numbers/rand"];
+    }
+
+    const numbers = [];
+
+    const requests = url.map(async (url) => {
+      try {
+        const response = await axios.get(url);
+        const { numbers: urlNumbers } = response.data;
+        numbers.push(...urlNumbers);
+      } catch (error) {
+        console.error(`Error retrieving numbers from ${url}: ${error.message}`);
+      }
+    });
+
+    await Promise.all(requests);
+    const mergedNumbers = Array.from(new Set(numbers)).sort((a, b) => a - b);
+
+    res.json({ numbers: mergedNumbers });
+  } catch (error) {
+    console.error(`Error processing request: ${error.message}`);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
