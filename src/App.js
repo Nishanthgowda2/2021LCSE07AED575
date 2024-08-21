@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
-import ProductsList from './components/ProductList';
-import ProductDetail from './components/ProductDetails';
+import ProductsList from './ProductList';
+import ProductDetail from './ProductDetails';
 import './App.css';
 
 function App() {
